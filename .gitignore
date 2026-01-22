@@ -1,0 +1,29 @@
+# Environment
+venv/
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Streamlit
+.streamlit/
+
+# Temporary
+FINAL_UPLOAD.txt
+UPLOAD_CHECKLIST.txt
+
+# Brain
+implementation_plan.md
+task.md
+walkthrough.md
