@@ -332,7 +332,14 @@ def main():
                 padding-top: 1rem;
             }
             .block-container {
-                padding-top: 2rem;
+                padding-top: 0.5rem !important;
+                max-width: 100% !important;
+            }
+            [data-testid="stHeader"] {
+                display: none !important;
+            }
+            footer {
+                display: none !important;
             }
             
             .bottom-anchor {

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +14,7 @@
             z-index: 9999;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         }
-        
+
         .chat-toggle-btn {
             width: 60px;
             height: 60px;
@@ -21,57 +22,57 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             display: flex;
             align-items: center;
             justify-content: center;
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+
         .chat-toggle-btn:hover {
             transform: scale(1.1);
-            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
         }
-        
+
         .chat-toggle-btn svg {
             width: 30px;
             height: 30px;
             fill: white;
         }
-        
+
         .chat-iframe-container {
             display: none;
             position: fixed;
-            bottom: 100px;
+            bottom: 90px;
             right: 20px;
-            width: 420px;
-            height: 650px;
+            width: 350px;
+            height: 500px;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             overflow: hidden;
             flex-direction: column;
         }
-        
+
         .chat-iframe-container.open {
             display: flex;
         }
-        
+
         .chat-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 16px 20px;
+            padding: 10px 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .chat-header h3 {
             margin: 0;
             font-size: 18px;
             font-weight: 600;
         }
-        
+
         .chat-close-btn {
             background: none;
             border: none;
@@ -85,17 +86,17 @@
             border-radius: 4px;
             transition: background 0.2s;
         }
-        
+
         .chat-close-btn:hover {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255, 255, 255, 0.2);
         }
-        
+
         .streamlit-iframe {
             flex: 1;
             width: 100%;
             border: none;
         }
-        
+
         .loading-overlay {
             position: absolute;
             top: 0;
@@ -109,11 +110,11 @@
             justify-content: center;
             gap: 16px;
         }
-        
+
         .loading-overlay.hidden {
             display: none;
         }
-        
+
         .spinner {
             width: 40px;
             height: 40px;
@@ -122,22 +123,28 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         @media (max-width: 768px) {
             .chat-iframe-container {
                 width: calc(100vw - 40px);
                 height: calc(100vh - 140px);
-                bottom: 100px;
+                bottom: 90px;
                 right: 20px;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- 
     ====================================================================
@@ -148,65 +155,61 @@
     - OR use "Custom HTML" block in Gutenberg
     - OR use "Code Snippets" plugin
     -->
-    
+
     <div class="chat-widget-container">
         <!-- Toggle button -->
         <button class="chat-toggle-btn" onclick="toggleChat()" aria-label="Open chat">
             <svg viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
             </svg>
         </button>
-        
+
         <!-- Chat container -->
         <div class="chat-iframe-container" id="chatContainer">
             <div class="chat-header">
-                <h3>AI Assistant</h3>
-                <button class="chat-close-btn" onclick="toggleChat()" aria-label="Close chat">&times;</button>
+                <button class="chat-close-btn" onclick="toggleChat()" aria-label="Close chat"
+                    style="margin-left: auto;">&times;</button>
             </div>
-            
+
             <div style="position: relative; flex: 1;">
                 <!-- Loading overlay -->
                 <div class="loading-overlay" id="loadingOverlay">
                     <div class="spinner"></div>
                     <p style="color: #666; margin: 0;">Loading assistant...</p>
                 </div>
-                
+
                 <!-- Streamlit iframe -->
-                <iframe 
-                    class="streamlit-iframe"
-                    id="streamlitFrame"
-                    src=""
-                    allow="microphone; camera"
+                <iframe class="streamlit-iframe" id="streamlitFrame" src="" allow="microphone; camera"
                     onload="hideLoading()">
                 </iframe>
             </div>
         </div>
     </div>
-    
+
     <script>
         const STREAMLIT_URL = 'https://bradcharl14-echo-ai.hf.space?embed=true';
-		
+
         let iframeLoaded = false;
-        
+
         function toggleChat() {
             const container = document.getElementById('chatContainer');
             const iframe = document.getElementById('streamlitFrame');
-            
+
             container.classList.toggle('open');
-            
+
             // Load iframe only when first opened (performance optimization)
             if (!iframeLoaded && container.classList.contains('open')) {
                 iframe.src = STREAMLIT_URL;
                 iframeLoaded = true;
             }
         }
-        
+
         function hideLoading() {
             const overlay = document.getElementById('loadingOverlay');
             overlay.classList.add('hidden');
         }
     </script>
-    
+
     <!-- 
     ====================================================================
     SETUP INSTRUCTIONS
@@ -229,4 +232,5 @@
     ====================================================================
     -->
 </body>
+
 </html>
