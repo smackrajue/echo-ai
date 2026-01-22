@@ -2,6 +2,17 @@
 
 All notable changes to the Echo AI project will be documented in this file.
 
+## [2.2.0] - 2026-01-22
+### Added
+- **Pro Settings Panel**: New sidebar section for configuring CTA links, upsells, and cross-sell placeholders.
+- **Ticketing Integration**: "Create as a ticket" option added to fallback support flow for technical queries.
+- **Intelligent CTAs**: Automated injection of configured promotional links into AI responses for better conversion.
+- **Monetization Placeholders**: Placeholders for WordPress Coupons and Analytics dashboards.
+- **Suggested Topics Expansion**: Limited initial view to 6 topics with a "More topics" link to developer support.
+
+### Fixed
+- **WordPress Embedding**: Fixed "Refused to connect" error by updating `wordpress_integration.html` with direct `.hf.space` embed tokens.
+
 ## [2.1.0] - 2026-01-22
 ### Fixed
 - **Support Email Accuracy**: Corrected the support email address to `rajue@smackcoders.com` across all contact links and buttons.

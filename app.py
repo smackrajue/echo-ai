@@ -1,5 +1,5 @@
 """
-Echo AI - Version 2.1
+Echo AI - Version 2.2
 Persistent vector storage with Pinecone | Cost: $0/month
 """
 
@@ -27,7 +27,7 @@ from urllib.parse import quote
 load_dotenv()
 
 # Set User Agent to avoid warnings
-os.environ["USER_AGENT"] = "EchoAI/2.1"
+os.environ["USER_AGENT"] = "EchoAI/2.2"
 
 # ==================== CONFIGURATION ====================
 GROQ_API_KEY = os.getenv("GROQ_API_KEY") or st.secrets.get("GROQ_API_KEY", "")
@@ -36,6 +36,7 @@ PINECONE_ENVIRONMENT = os.getenv("PINECONE_ENVIRONMENT", "us-east-1")
 INDEX_NAME = "echo-ai"
 DEMO_FILE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "demo.txt")
 RESET_INTERVAL_HOURS = 24
+PRO_SUPPORT_URL = "mailto:rajue@smackcoders.com?subject=EchoAI%20Support"
 
 # Page config
 st.set_page_config(
@@ -288,11 +289,19 @@ Helpful Answer:"""
         combine_docs_chain_kwargs={"prompt": PROMPT}
     )
 
+def handle_pro_click(feature_name):
+    """Display Pro message and trigger mailto"""
+    st.toast("🚀 Pro Custom Options: Contact developer for more options.", icon="⚠️")
+    time.sleep(1)
+    st.markdown(f'<meta http-equiv="refresh" content="0; url={PRO_SUPPORT_URL}">', unsafe_allow_html=True)
+
 def main():
     if "messages" not in st.session_state: st.session_state.messages = []
     if "qa_chain" not in st.session_state: st.session_state.qa_chain = None
     if "client_name" not in st.session_state: st.session_state.client_name = "Smackcoders"
     if "mode" not in st.session_state: st.session_state.mode = "Demo"
+    if "cta_links" not in st.session_state: st.session_state.cta_links = "🔥 Get Pro Version: https://www.smackcoders.com/echo-ai\n📦 Buy Bundle: https://www.smackcoders.com/bundle"
+    if "upsell_links" not in st.session_state: st.session_state.upsell_links = "⚡ Upgrade to Enterprise: Contact Support"
 
     check_and_reset_demo()
 
@@ -326,17 +335,26 @@ def main():
                 padding-top: 2rem;
             }
             
-            /* Anchor link at bottom */
             .bottom-anchor {
                 text-align: right;
                 font-size: 0.8rem;
                 margin-top: 1rem;
             }
+            
+            /* CTA Styling */
+            .cta-box {
+                background: #f0f7ff;
+                border-left: 4px solid #007bff;
+                padding: 10px;
+                margin: 10px 0;
+                border-radius: 4px;
+                font-size: 0.9rem;
+            }
         </style>
     """, unsafe_allow_html=True)
     
     with st.sidebar:
-        # Move Status Metric to Top of sidebar (above title)
+        # Status Metric
         if st.session_state.qa_chain:
             st.metric("Status", "Ready", delta="Chat active")
         elif st.session_state.mode == "Demo" and not st.session_state.get("demo_loaded", False):
@@ -363,7 +381,7 @@ def main():
                 if not uploaded_files and not urls_input:
                     st.error("Please upload files or enter URLs first!")
                 else:
-                    with st.spinner("Processing documents... This may take 2-5 minutes..."):
+                    with st.spinner("Processing documents..."):
                         vectorstore, num_chunks = process_documents(uploaded_files, urls_input, client_name)
                         if vectorstore:
                             st.success(f"✅ Processed {num_chunks} document chunks!")
@@ -400,9 +418,23 @@ def main():
             st.session_state.messages = []
             st.rerun()
         
+        # 🚀 PRO SETTINGS PANEL
+        with st.expander("🚀 Pro Settings (Custom Options)", expanded=False):
+            st.subheader("CTA Configuration")
+            st.session_state.cta_links = st.text_area("Promoted CTA Links (config)", value=st.session_state.cta_links, height=80)
+            
+            st.subheader("Monetization")
+            st.session_state.upsell_links = st.text_input("Upsell/Cross-sell Config", value=st.session_state.upsell_links)
+            
+            if st.button("🎟️ Integrate WP Coupons", use_container_width=True):
+                handle_pro_click("Coupons")
+            
+            if st.button("📊 Analytics Dashboard", use_container_width=True):
+                handle_pro_click("Analytics")
+
         st.divider()
         if st.button("📧 Support Email", use_container_width=True):
-             st.markdown("[Click to Email Support](mailto:rajue@smackcoders.com?subject=EchoAI%20Support)")
+             st.markdown(f"[Click to Email Support]({PRO_SUPPORT_URL})")
         
         with st.expander("⚙️ Configuration"):
             c1, c2 = st.columns(2)
@@ -416,7 +448,6 @@ def main():
     # Suggested Topics
     if not st.session_state.messages:
         st.subheader("💡 Suggested Topics")
-        # Dynamic suggestions based on content if ready
         topics = [
             ("Importing CSV Data", "How do I import CSV data?"),
             ("Exporting Data", "How can I export my WordPress data?"),
@@ -425,12 +456,15 @@ def main():
             ("Troubleshooting", "Common issues during import?"),
             ("AI Features", "How does AI integration work?")
         ]
-        # Show a random selection or first 6
         cols = st.columns(3)
         for i, (label, prompt) in enumerate(topics[:6]):
             with cols[i % 3]:
                 if st.button(label, use_container_width=True, key=f"sug_{i}"):
                     st.session_state.suggested_prompt = prompt
+        
+        # More topics link
+        if st.link_button("🔗 More topics...", PRO_SUPPORT_URL, use_container_width=True):
+            st.toast("Pro Custom Options: Contact for full topic list.", icon="ℹ️")
 
     # Handle suggestions
     if "suggested_prompt" in st.session_state:
@@ -446,6 +480,8 @@ def main():
                 with st.expander("📖 Sources"):
                     for i, source in enumerate(message["sources"], 1):
                         st.caption(f"{i}. {source}")
+            if message["role"] == "assistant" and "cta" in message:
+                st.markdown(f'<div class="cta-box">{message["cta"]}</div>', unsafe_allow_html=True)
 
     # Chat Input
     prompt_input = st.chat_input("What would you like to know?")
@@ -453,14 +489,14 @@ def main():
     active_prompt = None
     if prompt_input:
         active_prompt = prompt_input
-    elif st.session_state.messages and st.session_state.messages[-1]["role"] == "user" and len(st.session_state.messages) % 2 != 0:
+    elif st.session_state.messages and st.session_state.messages[-1]["role"] == "user" and (len(st.session_state.messages) == 1 or st.session_state.messages[-2]["role"] == "assistant"):
         active_prompt = st.session_state.messages[-1]["content"]
 
     if active_prompt:
         if not st.session_state.qa_chain:
             st.error("⚠️ Please process documents first using the sidebar!")
         else:
-            if prompt_input: # Only show message if manual input
+            if prompt_input: 
                 with st.chat_message("user"): st.markdown(active_prompt)
                 st.session_state.messages.append({"role": "user", "content": active_prompt})
             
@@ -472,19 +508,37 @@ def main():
                         source_docs = response.get("source_documents", [])
                         
                         if "NO_ANSWER_FOUND" in answer:
-                            answer = "I couldn't find an answer in documentation. Contact support?"
+                            answer = "I couldn't find an answer in documentation. How would you like to proceed?"
                             st.markdown(answer)
-                            mailto = f"mailto:rajue@smackcoders.com?subject=Support%20Request&body=Question:%20{quote(active_prompt)}"
-                            st.link_button("📧 Contact Support", mailto)
+                            c1, c2 = st.columns(2)
+                            with c1:
+                                mailto_support = f"mailto:rajue@smackcoders.com?subject=Support%20Request&body=Question:%20{quote(active_prompt)}"
+                                st.link_button("📧 Contact Support", mailto_support, use_container_width=True)
+                            with c2:
+                                if st.button("🎫 Create as a Ticket", use_container_width=True):
+                                    handle_pro_click("Ticketing")
                         else:
                             st.markdown(answer)
                             sources = list(set([doc.metadata.get('source', 'Unknown') for doc in source_docs]))
-                            if sources:
+                            
+                            # Intelligent CTA injection (1 in 3 chance or if historical)
+                            cta_to_add = None
+                            if random.random() < 0.4:
+                                links = [l.strip() for l in st.session_state.cta_links.split('\n') if l.strip()]
+                                if links: cta_to_add = random.choice(links)
+
+                            msg_obj = {"role": "assistant", "content": answer}
+                            if sources: 
+                                msg_obj["sources"] = sources
                                 with st.expander("📖 Sources"):
                                     for i, s in enumerate(sources, 1): st.caption(f"{i}. {s}")
-                                st.session_state.messages.append({"role": "assistant", "content": answer, "sources": sources})
-                            else:
-                                st.session_state.messages.append({"role": "assistant", "content": answer})
+                            
+                            if cta_to_add:
+                                msg_obj["cta"] = cta_to_add
+                                st.markdown(f'<div class="cta-box">{cta_to_add}</div>', unsafe_allow_html=True)
+                            
+                            st.session_state.messages.append(msg_obj)
+                            
                     except Exception as e:
                         st.error(f"Error: {str(e)}")
 
@@ -495,8 +549,8 @@ def main():
     st.divider()
     fc1, fc2, fc3 = st.columns(3)
     with fc1: st.caption("🤖 Powered by smackcoders")
-    with fc2: st.caption("v2.1 Stable")
-    with fc3: st.link_button("Contact for Full Version", "mailto:rajue@smackcoders.com?subject=EchoAI-Support")
+    with fc2: st.caption("v2.2 Pro-Lite")
+    with fc3: st.link_button("Contact for Full Version", PRO_SUPPORT_URL)
 
 # ==================== RUN APP ====================
 if __name__ == "__main__":

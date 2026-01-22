@@ -41,6 +41,15 @@ Echo AI is designed to minimize support load. However, when it cannot find an an
 - It responds with a professional "I couldn't find an answer..." message.
 - It displays a **📧 Contact Support** button that pre-fills an email with the user's question.
 
+### 4.4 Pro Customization (v2.2)
+Echo AI includes a **Pro Settings** panel for advanced business integration:
+- **Intelligent CTA Injection**: Configure promotional links; the AI will occasionally (randomly) inject these as stylized CTA boxes in responses.
+- **Ticketing Flow**: If no answer is found, users see a "Create as a Ticket" option, serving as a placeholder for enterprise helpdesk integration.
+- **Monetization Placeholders**: Built-in support for WordPress Coupons and Analytics dashboard concepts.
+- **Suggest Topic Expansion**: Curated startup topics are limited to 6, with a link to "More topics" leading to developer support.
+
+---
+
 ## 5. Technical Configuration
 
 ### 5.1 Prerequisites
